@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: localshops-migrate
+  labels:
+    app.kubernetes.io/name: migration
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: migration
+    spec:
+      serviceAccountName: database-maintenance
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: ocir-pull
+      containers:
+        - name: migrate
+          image: localshops-api
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - alembic upgrade head && python -m app.seed
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: localshops-database
+                  key: url
+          resources:
+            requests:
+              cpu: 25m
+              memory: 80Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true

@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: localshops-dev
+resources:
+  - ../../../base/migration
+images:
+  - name: localshops-api
+    newName: registry.invalid/localshops-api
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+patches:
+  - target:
+      kind: Job
+      name: localshops-migrate
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.io/hostname: node01

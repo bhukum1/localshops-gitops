@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: localshops-config
+data:
+  ENVIRONMENT: development
+  APP_ORIGIN: https://dev-app.bhuplabs.dev
+  API_INTERNAL_URL: http://api.localshops-dev.svc.cluster.local:8000
+  KEYCLOAK_ISSUER: https://auth.bhuplabs.dev/realms/localshops-dev
+  KEYCLOAK_JWKS_URL: http://keycloak.keycloak.svc.cluster.local:8080/realms/localshops-dev/protocol/openid-connect/certs
+  KEYCLOAK_CLIENT_ID: localshops-bff-dev
+  KEYCLOAK_ADMIN_URL: http://keycloak.keycloak.svc.cluster.local:8080
+  KEYCLOAK_PROVISIONER_CLIENT_ID: localshops-provisioner-dev
+  CORS_ORIGINS: https://dev-shops.bhuplabs.dev,https://dev-app.bhuplabs.dev
+  OIDC_ISSUER: https://auth.bhuplabs.dev/realms/localshops-dev
+  OIDC_INTERNAL_URL: http://keycloak.keycloak.svc.cluster.local:8080/realms/localshops-dev
+  OIDC_JWKS_URL: http://keycloak.keycloak.svc.cluster.local:8080/realms/localshops-dev/protocol/openid-connect/certs
+  OIDC_CLIENT_ID: localshops-bff-dev

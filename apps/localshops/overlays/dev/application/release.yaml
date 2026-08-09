@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: localshops-release
+  labels:
+    app.kubernetes.io/part-of: bhuplabs-local
+data:
+  environment: dev
+  source-revision: "0000000000000000000000000000000000000000"
