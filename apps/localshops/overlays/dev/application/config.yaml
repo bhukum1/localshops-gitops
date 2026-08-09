@@ -9,6 +9,7 @@ data:
   KEYCLOAK_ISSUER: https://auth.bhuplabs.dev/realms/localshops-dev
   KEYCLOAK_JWKS_URL: http://keycloak.keycloak.svc.cluster.local:8080/realms/localshops-dev/protocol/openid-connect/certs
   KEYCLOAK_CLIENT_ID: localshops-bff-dev
+  KEYCLOAK_REALM: localshops-dev
   KEYCLOAK_ADMIN_URL: http://keycloak.keycloak.svc.cluster.local:8080
   KEYCLOAK_PROVISIONER_CLIENT_ID: localshops-provisioner-dev
   CORS_ORIGINS: https://dev-shops.bhuplabs.dev,https://dev-app.bhuplabs.dev
