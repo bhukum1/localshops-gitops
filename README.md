@@ -26,3 +26,7 @@ docs/BOOTSTRAP.md                  One-time bootstrap and recovery procedure
 The source CI repository is <https://github.com/bhukum1/localshops-platform>. A successful
 push to its `dev` branch builds ARM64 images, scans them, pushes them to OCIR and commits the
 resulting digests here.
+
+The dev overlay currently sets `OWNER_MFA_REQUIRED=false` so demo shop owners are not sent
+through authenticator enrollment. This override is intentionally scoped to dev; the application
+default remains MFA-enabled.

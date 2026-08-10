@@ -13,6 +13,7 @@ data:
   KEYCLOAK_REALM: localshops-dev
   KEYCLOAK_ADMIN_URL: http://keycloak.keycloak.svc.cluster.local:8080
   KEYCLOAK_PROVISIONER_CLIENT_ID: localshops-provisioner-dev
+  OWNER_MFA_REQUIRED: "false"
   CORS_ORIGINS: https://dev-shops.bhuplabs.dev,https://dev-app.bhuplabs.dev
   OIDC_ISSUER: https://auth.bhuplabs.dev/realms/localshops-dev
   OIDC_INTERNAL_URL: http://keycloak.keycloak.svc.cluster.local:8080/realms/localshops-dev
