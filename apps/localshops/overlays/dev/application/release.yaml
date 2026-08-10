@@ -6,4 +6,4 @@ metadata:
     app.kubernetes.io/part-of: bhuplabs-local
 data:
   environment: dev
-  source-revision: "452986a19a715e5159ef2df1b8f2ad6b0b42a183"
+  source-revision: "2152f7f5ebdf4bb5bb5340c55a6e63803fea263d"
