@@ -8,10 +8,10 @@ resources:
 images:
   - name: localshops-api
     newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-api
-    digest: sha256:61f602fb7dc440e5711b9353bfd684d70f38e04e854540f4c8a030376c16aa53
+    digest: sha256:fdb74002034d6b8db19c7ed558b5844376523dc75fcce405292454c79316bb24
   - name: localshops-web
     newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-web
-    digest: sha256:2494099cd065dedd985bc0eae7d37ef89e8f4717ae11f8686703165c3fb31cdf
+    digest: sha256:766340498f58225931ac9097cab098448c57d55ff99ab7cb0524137515025dc3
 patches:
   - target:
       kind: Deployment
