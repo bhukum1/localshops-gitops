@@ -26,4 +26,4 @@ patches:
       - op: add
         path: /spec/template/spec/nodeSelector
         value:
-          kubernetes.io/hostname: node01
+          kubernetes.io/hostname: node02

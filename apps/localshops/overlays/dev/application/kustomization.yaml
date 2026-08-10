@@ -20,7 +20,11 @@ patches:
       - op: add
         path: /spec/template/spec/nodeSelector
         value:
-          kubernetes.io/hostname: node01
+          kubernetes.io/hostname: node02
+      - op: replace
+        path: /spec/strategy
+        value:
+          type: Recreate
   - target:
       kind: Deployment
       name: web
@@ -28,4 +32,8 @@ patches:
       - op: add
         path: /spec/template/spec/nodeSelector
         value:
-          kubernetes.io/hostname: node01
+          kubernetes.io/hostname: node02
+      - op: replace
+        path: /spec/strategy
+        value:
+          type: Recreate
