@@ -2,7 +2,8 @@
 
 The cluster must pull this private repository; GitHub Actions never receives a Kubernetes
 kubeconfig. Flux uses a repository-specific, read-only SSH deploy key stored in the
-`flux-system` namespace.
+`flux-system` namespace and GitHub's `ssh.github.com:443` endpoint so the cluster does
+not require general outbound SSH on TCP 22.
 
 ## One-time prerequisites
 
@@ -13,7 +14,8 @@ kubeconfig. Flux uses a repository-specific, read-only SSH deploy key stored in 
 - Add the generated Flux public key to
   `github.com/bhukum1/localshops-gitops` as a read-only deploy key.
 - Apply the pinned Flux v2.9.3 install manifest, then apply the repository authentication
-  Secret and `clusters/pilot/dev/flux-system/gotk-sync.yaml`.
+  Secret and `clusters/pilot/dev/flux-system/gotk-sync.yaml`. The Secret's `known_hosts`
+  entry must include the host key for `[ssh.github.com]:443`.
 
 The exact operator commands and Secret schemas are also documented in the application
 operations runbook. Bootstrap is the only step requiring direct cluster administration;

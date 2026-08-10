@@ -10,7 +10,8 @@ spec:
   secretRef:
     name: flux-system
   timeout: 60s
-  url: ssh://git@github.com/bhukum1/localshops-gitops.git
+  # GitHub's official SSH-over-443 endpoint works with restricted HTTPS egress.
+  url: ssh://git@ssh.github.com:443/bhukum1/localshops-gitops.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
