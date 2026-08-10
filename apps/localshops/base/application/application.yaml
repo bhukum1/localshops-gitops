@@ -180,28 +180,19 @@ spec:
               memory: 320Mi
           startupProbe:
             httpGet:
-              path: /
+              path: /api/health
               port: http
-              httpHeaders:
-                - name: Host
-                  value: dev-shops.bhuplabs.dev
             failureThreshold: 30
             periodSeconds: 2
           readinessProbe:
             httpGet:
-              path: /
+              path: /api/health
               port: http
-              httpHeaders:
-                - name: Host
-                  value: dev-shops.bhuplabs.dev
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /
+              path: /api/health
               port: http
-              httpHeaders:
-                - name: Host
-                  value: dev-shops.bhuplabs.dev
             periodSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
