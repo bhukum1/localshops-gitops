@@ -37,3 +37,15 @@ patches:
         path: /spec/strategy
         value:
           type: Recreate
+  - target:
+      kind: Deployment
+      name: notification-worker
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.io/hostname: node01
+      - op: replace
+        path: /spec/strategy
+        value:
+          type: Recreate
