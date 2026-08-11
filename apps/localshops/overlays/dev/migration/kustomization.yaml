@@ -6,7 +6,7 @@ resources:
 images:
   - name: localshops-api
     newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-api
-    digest: sha256:19e9488167ba202f5da81236a95cd06e470dab545610d52d1046a50a29b8d266
+    digest: sha256:0a5e94c532458ac48e70901f762d86274cffb14885bf5dc1e8e3f397fdc87d8f
 patches:
   - target:
       kind: Job
