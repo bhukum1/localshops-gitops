@@ -53,7 +53,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: redis
-          image: redis:8.2-alpine
+          image: docker.io/library/redis:8.2-alpine
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
@@ -62,16 +62,19 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef: {name: localshops-runtime, key: redis-password}
+            - name: REDISCLI_AUTH
+              valueFrom:
+                secretKeyRef: {name: localshops-runtime, key: redis-password}
           ports:
             - {name: redis, containerPort: 6379}
           resources:
             requests: {cpu: 25m, memory: 48Mi}
             limits: {cpu: 250m, memory: 192Mi}
           readinessProbe:
-            exec: {command: ["sh", "-ec", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]}
+            exec: {command: ["sh", "-ec", "redis-cli ping | grep -q PONG"]}
             periodSeconds: 5
           livenessProbe:
-            exec: {command: ["sh", "-ec", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]}
+            exec: {command: ["sh", "-ec", "redis-cli ping | grep -q PONG"]}
             periodSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false

@@ -9,8 +9,8 @@ resources:
   - network-policies.yaml
 images:
   - name: localshops-api
-    newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-api
-    digest: sha256:e3ab2c32831adafcd07304cd92922ebf287afa5f29381d48d9113ddc154d847b
+    newName: hyd.ocir.io/axbcwhek7zcg/localshops-api
+    digest: sha256:504c554108221082f96aeb7394793c1d8fe8f46cbd6f92059cd59705c8e4106d
   - name: localshops-web
-    newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-web
-    digest: sha256:eea301fac62b9eaaf585ef1b8170e6ac0371faa9584435edd15604f4dd733863
+    newName: hyd.ocir.io/axbcwhek7zcg/localshops-web
+    digest: sha256:eb8a5b8cc8041ba8f3b2748b7e401e5f3e3bb44d23c4b4eaaa72f0ac6c177f0e
