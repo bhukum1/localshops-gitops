@@ -1,6 +1,6 @@
 # Localshops OKE production
 
-This package is intentionally separate from the legacy dev overlays. It deploys native merchant authentication, an ephemeral in-cluster Redis, and the application workloads while using standalone PostgreSQL at `10.200.0.2` through a Kubernetes Secret.
+This package is intentionally separate from the legacy dev overlays. It deploys native merchant authentication, an ephemeral in-cluster Redis, and the application workloads while using standalone PostgreSQL on node02 through a Kubernetes Secret. OKE reaches PostgreSQL over TLS through node02's public IP, with OCI and host firewalls restricted to the cluster's stable NAT IP.
 
 Secrets are provisioned out of band and never committed:
 

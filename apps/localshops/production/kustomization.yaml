@@ -6,7 +6,6 @@ resources:
   - application.yaml
   - migration.yaml
   - ingress.yaml
-  - legacy-dev-bridge.yaml
   - network-policies.yaml
 images:
   - name: localshops-api

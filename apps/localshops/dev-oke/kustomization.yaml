@@ -1,0 +1,93 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: localshops-dev
+resources:
+  - ../production
+patches:
+  - target: {kind: Namespace, name: localshops}
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: localshops-dev
+  - target: {kind: ConfigMap, name: localshops-config}
+    patch: |-
+      - op: replace
+        path: /data/ENVIRONMENT
+        value: development
+      - op: replace
+        path: /data/APP_ORIGIN
+        value: https://dev-app.bhuplabs.dev
+      - op: replace
+        path: /data/STOREFRONT_ORIGIN
+        value: https://dev-shops.bhuplabs.dev
+      - op: replace
+        path: /data/API_INTERNAL_URL
+        value: http://api.localshops-dev.svc.cluster.local:8000
+      - op: replace
+        path: /data/CORS_ORIGINS
+        value: https://dev-shops.bhuplabs.dev,https://dev-app.bhuplabs.dev
+  - target: {kind: Deployment, name: api}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 40m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 112Mi
+  - target: {kind: Deployment, name: web}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 35m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 112Mi
+  - target: {kind: Certificate, name: localshops-tls}
+    patch: |-
+      - op: replace
+        path: /spec/dnsNames
+        value: [dev-shops.bhuplabs.dev, dev-app.bhuplabs.dev, dev-api.bhuplabs.dev]
+  - target: {kind: Ingress, name: localshops}
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts
+        value: [dev-shops.bhuplabs.dev, dev-app.bhuplabs.dev, dev-api.bhuplabs.dev]
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev-shops.bhuplabs.dev
+      - op: replace
+        path: /spec/rules/1/host
+        value: dev-app.bhuplabs.dev
+      - op: replace
+        path: /spec/rules/2/host
+        value: dev-api.bhuplabs.dev
+  - target: {kind: Job, name: localshops-migrate-f706062}
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: localshops-dev-migrate-f706062
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value: [alembic upgrade head]
+      - op: remove
+        path: /spec/template/spec/containers/0/envFrom
+  - target: {kind: ResourceQuota, name: localshops-budget}
+    patch: |-
+      - op: replace
+        path: /spec/hard/requests.cpu
+        value: 750m
+      - op: replace
+        path: /spec/hard/requests.memory
+        value: 1536Mi
+      - op: replace
+        path: /spec/hard/limits.cpu
+        value: "3"
+      - op: replace
+        path: /spec/hard/limits.memory
+        value: 3Gi
