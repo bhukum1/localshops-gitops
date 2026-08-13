@@ -10,7 +10,7 @@ resources:
 images:
   - name: localshops-api
     newName: hyd.ocir.io/axbcwhek7zcg/localshops-api
-    digest: sha256:504c554108221082f96aeb7394793c1d8fe8f46cbd6f92059cd59705c8e4106d
+    digest: sha256:96170667c14c7fb187045431945ec13199d3eb101f3d7c2e4597ddb16b052443
   - name: localshops-web
     newName: hyd.ocir.io/axbcwhek7zcg/localshops-web
-    digest: sha256:eb8a5b8cc8041ba8f3b2748b7e401e5f3e3bb44d23c4b4eaaa72f0ac6c177f0e
+    digest: sha256:3ee703ee5ad6b0afba0c4cf33288ec6ad852e56eb6327ef3c20eec5bee52673d
