@@ -18,8 +18,20 @@ patches:
         path: /data/APP_ORIGIN
         value: https://dev-app.bhuplabs.dev
       - op: replace
+        path: /data/ADMIN_ORIGIN
+        value: https://dev-app.bhuplabs.dev
+      - op: replace
         path: /data/STOREFRONT_ORIGIN
         value: https://dev-shops.bhuplabs.dev
+      - op: replace
+        path: /data/APP_HOSTS
+        value: dev-app.bhuplabs.dev
+      - op: replace
+        path: /data/ADMIN_HOSTS
+        value: dev-app.bhuplabs.dev
+      - op: replace
+        path: /data/STOREFRONT_HOSTS
+        value: dev-shops.bhuplabs.dev
       - op: replace
         path: /data/API_INTERNAL_URL
         value: http://api.localshops-dev.svc.cluster.local:8000
@@ -59,14 +71,26 @@ patches:
         path: /spec/tls/0/hosts
         value: [dev-shops.bhuplabs.dev, dev-app.bhuplabs.dev, dev-api.bhuplabs.dev]
       - op: replace
-        path: /spec/rules/0/host
-        value: dev-shops.bhuplabs.dev
-      - op: replace
-        path: /spec/rules/1/host
-        value: dev-app.bhuplabs.dev
-      - op: replace
-        path: /spec/rules/2/host
-        value: dev-api.bhuplabs.dev
+        path: /spec/rules
+        value:
+          - host: dev-shops.bhuplabs.dev
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend: {service: {name: web, port: {number: 3000}}}
+          - host: dev-app.bhuplabs.dev
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend: {service: {name: web, port: {number: 3000}}}
+          - host: dev-api.bhuplabs.dev
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend: {service: {name: api, port: {number: 8000}}}
   - target: {kind: Job, name: localshops-migrate-f706062}
     patch: |-
       - op: replace

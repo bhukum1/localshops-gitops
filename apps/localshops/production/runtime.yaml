@@ -5,11 +5,15 @@ metadata:
   namespace: localshops
 data:
   ENVIRONMENT: production
-  APP_ORIGIN: https://app.bhuplabs.dev
-  STOREFRONT_ORIGIN: https://shops.bhuplabs.dev
+  APP_ORIGIN: https://app.dukly.in
+  ADMIN_ORIGIN: https://admin.dukly.in
+  STOREFRONT_ORIGIN: https://dukly.in
+  APP_HOSTS: app.dukly.in,app.bhuplabs.dev
+  ADMIN_HOSTS: admin.dukly.in,app.bhuplabs.dev
+  STOREFRONT_HOSTS: dukly.in,www.dukly.in,shops.dukly.in,shops.bhuplabs.dev
   API_INTERNAL_URL: http://api.localshops.svc.cluster.local:8000
-  CORS_ORIGINS: https://shops.bhuplabs.dev,https://app.bhuplabs.dev
-  VAPID_SUBJECT: mailto:admin@bhuplabs.dev
+  CORS_ORIGINS: https://dukly.in,https://www.dukly.in,https://shops.dukly.in,https://app.dukly.in,https://admin.dukly.in,https://shops.bhuplabs.dev,https://app.bhuplabs.dev
+  VAPID_SUBJECT: mailto:admin@dukly.in
   MERCHANT_SESSION_HOURS: "8"
   LOGIN_ATTEMPT_LIMIT: "10"
   LOGIN_ATTEMPT_WINDOW_SECONDS: "900"

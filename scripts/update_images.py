@@ -39,7 +39,7 @@ def replace_image(path: Path, name: str, image: str, digest: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--environment", choices=("dev",), required=True)
+    parser.add_argument("--environment", choices=("dev", "production"), required=True)
     parser.add_argument("--api-image", required=True)
     parser.add_argument("--api-digest", required=True)
     parser.add_argument("--web-image", required=True)
@@ -57,6 +57,12 @@ def main() -> None:
         raise ValueError("source revision must be a full Git SHA")
 
     root = Path(__file__).resolve().parents[1]
+    if args.environment == "production":
+        kustomization = root / "apps" / "localshops" / "production" / "kustomization.yaml"
+        replace_image(kustomization, "localshops-api", args.api_image, args.api_digest)
+        replace_image(kustomization, "localshops-web", args.web_image, args.web_digest)
+        return
+
     overlay = root / "apps" / "localshops" / "overlays" / args.environment
     replace_image(overlay / "migration" / "kustomization.yaml", "localshops-api", args.api_image, args.api_digest)
     replace_image(overlay / "application" / "kustomization.yaml", "localshops-api", args.api_image, args.api_digest)

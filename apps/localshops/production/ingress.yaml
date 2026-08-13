@@ -3,7 +3,7 @@ kind: Certificate
 metadata: {name: localshops-tls, namespace: localshops}
 spec:
   secretName: localshops-tls
-  dnsNames: [shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
+  dnsNames: [dukly.in, www.dukly.in, shops.dukly.in, app.dukly.in, admin.dukly.in, api.dukly.in, shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
   issuerRef: {kind: ClusterIssuer, name: letsencrypt-prod}
 ---
 apiVersion: networking.k8s.io/v1
@@ -17,8 +17,44 @@ spec:
   ingressClassName: traefik
   tls:
     - secretName: localshops-tls
-      hosts: [shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
+      hosts: [dukly.in, www.dukly.in, shops.dukly.in, app.dukly.in, admin.dukly.in, api.dukly.in, shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
   rules:
+    - host: dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: www.dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: shops.dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: app.dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: admin.dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: api.dukly.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: api, port: {number: 8000}}}
     - host: shops.bhuplabs.dev
       http:
         paths:
