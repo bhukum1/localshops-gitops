@@ -20,7 +20,9 @@ spec:
       securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
       containers:
         - name: migrate
-          image: localshops-api
+          # Completed Jobs are immutable. Pin the image that ran this migration;
+          # a future schema change must use a new Job name and image digest.
+          image: hyd.ocir.io/axbcwhek7zcg/localshops-api@sha256:504c554108221082f96aeb7394793c1d8fe8f46cbd6f92059cd59705c8e4106d
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args: ["alembic upgrade head && python -m app.bootstrap_admin"]
