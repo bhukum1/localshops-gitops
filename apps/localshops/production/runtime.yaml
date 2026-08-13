@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: localshops-config
+  namespace: localshops
+data:
+  ENVIRONMENT: production
+  APP_ORIGIN: https://app.bhuplabs.dev
+  STOREFRONT_ORIGIN: https://shops.bhuplabs.dev
+  API_INTERNAL_URL: http://api.localshops.svc.cluster.local:8000
+  CORS_ORIGINS: https://shops.bhuplabs.dev,https://app.bhuplabs.dev
+  VAPID_SUBJECT: mailto:admin@bhuplabs.dev
+  MERCHANT_SESSION_HOURS: "8"
+  LOGIN_ATTEMPT_LIMIT: "10"
+  LOGIN_ATTEMPT_WINDOW_SECONDS: "900"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-redis
+  namespace: localshops
+spec:
+  selector:
+    app.kubernetes.io/name: session-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-redis
+  namespace: localshops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: session-redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: session-redis
+        app.kubernetes.io/part-of: bhuplabs-local
+    spec:
+      serviceAccountName: session-redis
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: redis
+          image: redis:8.2-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - exec redis-server --save '' --appendonly no --maxmemory 128mb --maxmemory-policy noeviction --requirepass "$REDIS_PASSWORD"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: localshops-runtime, key: redis-password}
+          ports:
+            - {name: redis, containerPort: 6379}
+          resources:
+            requests: {cpu: 25m, memory: 48Mi}
+            limits: {cpu: 250m, memory: 192Mi}
+          readinessProbe:
+            exec: {command: ["sh", "-ec", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]}
+            periodSeconds: 5
+          livenessProbe:
+            exec: {command: ["sh", "-ec", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]}
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+            readOnlyRootFilesystem: true

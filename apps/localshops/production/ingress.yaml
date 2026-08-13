@@ -1,0 +1,39 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: localshops-tls, namespace: localshops}
+spec:
+  secretName: localshops-tls
+  dnsNames: [shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
+  issuerRef: {kind: ClusterIssuer, name: letsencrypt-prod}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: localshops
+  namespace: localshops
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  ingressClassName: traefik
+  tls:
+    - secretName: localshops-tls
+      hosts: [shops.bhuplabs.dev, app.bhuplabs.dev, api.bhuplabs.dev]
+  rules:
+    - host: shops.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: app.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: web, port: {number: 3000}}}
+    - host: api.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: api, port: {number: 8000}}}

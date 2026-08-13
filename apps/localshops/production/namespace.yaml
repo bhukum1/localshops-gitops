@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: localshops
+  labels:
+    app.kubernetes.io/part-of: bhuplabs-local
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: v1.36
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.36
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.36
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: web
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: notification-worker
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: session-redis
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: database-maintenance
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-resources
+  namespace: localshops
+spec:
+  limits:
+    - type: Container
+      defaultRequest: {cpu: 25m, memory: 64Mi}
+      default: {cpu: 500m, memory: 512Mi}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: localshops-budget
+  namespace: localshops
+spec:
+  hard:
+    requests.cpu: "1500m"
+    requests.memory: 3Gi
+    limits.cpu: "6"
+    limits.memory: 6Gi
+    pods: "30"
+    services: "12"

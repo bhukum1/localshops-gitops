@@ -1,0 +1,104 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny, namespace: localshops}
+spec: {podSelector: {}, policyTypes: [Ingress, Egress]}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-dns-egress, namespace: localshops}
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}
+          podSelector: {matchLabels: {k8s-app: kube-dns}}
+      ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: public-app-ingress, namespace: localshops}
+spec:
+  podSelector:
+    matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, web]}]
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: traefik}}
+      ports: [{protocol: TCP, port: 8000}, {protocol: TCP, port: 3000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: web-api, namespace: localshops}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/name: api}}
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{podSelector: {matchLabels: {app.kubernetes.io/name: web}}}]
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: web-api-egress, namespace: localshops}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/name: web}}
+  policyTypes: [Egress]
+  egress:
+    - to: [{podSelector: {matchLabels: {app.kubernetes.io/name: api}}}]
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: redis-ingress, namespace: localshops}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/name: session-redis}}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, web]}]
+      ports: [{protocol: TCP, port: 6379}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: redis-egress, namespace: localshops}
+spec:
+  podSelector:
+    matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, web]}]
+  policyTypes: [Egress]
+  egress:
+    - to: [{podSelector: {matchLabels: {app.kubernetes.io/name: session-redis}}}]
+      ports: [{protocol: TCP, port: 6379}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: database-egress, namespace: localshops}
+spec:
+  podSelector:
+    matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, migration, notification-worker]}]
+  policyTypes: [Egress]
+  egress:
+    - to: [{ipBlock: {cidr: 10.200.0.2/32}}]
+      ports: [{protocol: TCP, port: 5432}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: push-egress, namespace: localshops}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/name: notification-worker}}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+      ports: [{protocol: TCP, port: 443}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: acme-solver-ingress, namespace: localshops}
+spec:
+  podSelector: {matchLabels: {acme.cert-manager.io/http01-solver: "true"}}
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: traefik}}}]
