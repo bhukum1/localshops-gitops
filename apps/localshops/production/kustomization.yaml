@@ -13,4 +13,4 @@ images:
     digest: sha256:96170667c14c7fb187045431945ec13199d3eb101f3d7c2e4597ddb16b052443
   - name: localshops-web
     newName: hyd.ocir.io/axbcwhek7zcg/localshops-web
-    digest: sha256:3ee703ee5ad6b0afba0c4cf33288ec6ad852e56eb6327ef3c20eec5bee52673d
+    digest: sha256:ca24df6c738c467d68069ce541e2b6f2865c3e42cdb909086ce61460825e4a8d
