@@ -40,6 +40,10 @@ spec:
               valueFrom: {secretKeyRef: {name: localshops-runtime, key: redis-url}}
             - name: VAPID_PUBLIC_KEY
               valueFrom: {secretKeyRef: {name: localshops-vapid, key: public-key}}
+            - name: MEDIA_S3_ACCESS_KEY_ID
+              valueFrom: {secretKeyRef: {name: localshops-media, key: access-key-id}}
+            - name: MEDIA_S3_SECRET_ACCESS_KEY
+              valueFrom: {secretKeyRef: {name: localshops-media, key: secret-access-key}}
           ports: [{name: http, containerPort: 8000}]
           resources:
             requests: {cpu: 60m, memory: 128Mi}

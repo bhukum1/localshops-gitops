@@ -14,6 +14,10 @@ data:
   API_INTERNAL_URL: http://api.localshops.svc.cluster.local:8000
   CORS_ORIGINS: https://dukly.in,https://www.dukly.in,https://shops.dukly.in,https://app.dukly.in,https://admin.dukly.in,https://shops.bhuplabs.dev,https://app.bhuplabs.dev
   VAPID_SUBJECT: mailto:admin@dukly.in
+  MEDIA_S3_ENDPOINT_URL: https://axbcwhek7zcg.compat.objectstorage.ap-hyderabad-1.oraclecloud.com
+  MEDIA_S3_REGION: ap-hyderabad-1
+  MEDIA_S3_BUCKET: dukly-media
+  MEDIA_PUBLIC_BASE_URL: https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/axbcwhek7zcg/b/dukly-media/o
   MERCHANT_SESSION_HOURS: "8"
   LOGIN_ATTEMPT_LIMIT: "10"
   LOGIN_ATTEMPT_WINDOW_SECONDS: "900"
