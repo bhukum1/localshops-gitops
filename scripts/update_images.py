@@ -37,6 +37,27 @@ def replace_image(path: Path, name: str, image: str, digest: str) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
+def update_production_migration(
+    path: Path, image: str, digest: str, source_revision: str
+) -> None:
+    content = path.read_text()
+    content, name_count = re.subn(
+        r"(\n  name: localshops-migrate-)[a-z0-9]+",
+        rf"\g<1>{source_revision[:7]}",
+        content,
+        count=1,
+    )
+    content, image_count = re.subn(
+        r"(\n          image: )[a-zA-Z0-9._:/-]+@sha256:[0-9a-f]{64}",
+        rf"\g<1>{image}@{digest}",
+        content,
+        count=1,
+    )
+    if name_count != 1 or image_count != 1:
+        raise ValueError(f"production migration markers not found in {path}")
+    path.write_text(content)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--environment", choices=("dev", "production"), required=True)
@@ -58,9 +79,16 @@ def main() -> None:
 
     root = Path(__file__).resolve().parents[1]
     if args.environment == "production":
-        kustomization = root / "apps" / "localshops" / "production" / "kustomization.yaml"
+        production = root / "apps" / "localshops" / "production"
+        kustomization = production / "kustomization.yaml"
         replace_image(kustomization, "localshops-api", args.api_image, args.api_digest)
         replace_image(kustomization, "localshops-web", args.web_image, args.web_digest)
+        update_production_migration(
+            production / "migration.yaml",
+            args.api_image,
+            args.api_digest,
+            args.source_revision,
+        )
         return
 
     overlay = root / "apps" / "localshops" / "overlays" / args.environment
