@@ -52,7 +52,12 @@ spec:
           readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5}
           livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 15}
           securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"]}, readOnlyRootFilesystem: true}
+          volumeMounts:
+            - {name: temporary-files, mountPath: /tmp}
           lifecycle: {preStop: {exec: {command: ["sh", "-c", "sleep 5"]}}}
+      volumes:
+        - name: temporary-files
+          emptyDir: {medium: Memory, sizeLimit: 32Mi}
 ---
 apiVersion: v1
 kind: Service
