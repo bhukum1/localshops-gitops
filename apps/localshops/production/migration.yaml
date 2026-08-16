@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: localshops-migrate-41d5f81
+  name: localshops-migrate-880f8b1
   namespace: localshops
   labels: {app.kubernetes.io/name: migration}
 spec:
@@ -22,7 +22,7 @@ spec:
         - name: migrate
           # Completed Jobs are immutable. Pin the image that ran this migration;
           # a future schema change must use a new Job name and image digest.
-          image: hyd.ocir.io/axbcwhek7zcg/localshops-api@sha256:5b84232ef703053f206902f377f6b0671f63f462966b5c4715947ff4949a19bb
+          image: hyd.ocir.io/axbcwhek7zcg/localshops-api@sha256:5fbd1e48c987ec27d3f2e85deb80f388dbdb8fc231548dff82597fb3eb8b810a
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args: ["alembic upgrade head && python -m app.bootstrap_admin"]
