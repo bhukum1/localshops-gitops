@@ -73,10 +73,9 @@ spec:
               containerPort: 8000
           resources:
             requests:
-              cpu: 40m
+              cpu: 20m
               memory: 112Mi
             limits:
-              cpu: 500m
               memory: 384Mi
           startupProbe:
             httpGet:
@@ -168,10 +167,9 @@ spec:
               containerPort: 3000
           resources:
             requests:
-              cpu: 35m
+              cpu: 15m
               memory: 112Mi
             limits:
-              cpu: 400m
               memory: 320Mi
           startupProbe:
             httpGet:
@@ -274,7 +272,7 @@ spec:
                   key: private-key
           resources:
             requests:
-              cpu: 20m
+              cpu: 10m
               memory: 80Mi
             limits:
               cpu: 200m

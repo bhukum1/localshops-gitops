@@ -46,8 +46,8 @@ spec:
               valueFrom: {secretKeyRef: {name: localshops-media, key: secret-access-key}}
           ports: [{name: http, containerPort: 8000}]
           resources:
-            requests: {cpu: 60m, memory: 128Mi}
-            limits: {cpu: 600m, memory: 512Mi}
+            requests: {cpu: 25m, memory: 128Mi}
+            limits: {memory: 512Mi}
           startupProbe: {httpGet: {path: /health/live, port: http}, failureThreshold: 30, periodSeconds: 2}
           readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5}
           livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 15}
@@ -98,8 +98,8 @@ spec:
               valueFrom: {secretKeyRef: {name: localshops-runtime, key: redis-url}}
           ports: [{name: http, containerPort: 3000}]
           resources:
-            requests: {cpu: 50m, memory: 128Mi}
-            limits: {cpu: 500m, memory: 384Mi}
+            requests: {cpu: 20m, memory: 128Mi}
+            limits: {memory: 384Mi}
           startupProbe: {httpGet: {path: /api/health, port: http}, failureThreshold: 30, periodSeconds: 2}
           readinessProbe: {httpGet: {path: /api/health, port: http}, periodSeconds: 5}
           livenessProbe: {httpGet: {path: /api/health, port: http}, periodSeconds: 15}
@@ -137,7 +137,7 @@ spec:
             - name: VAPID_PRIVATE_KEY
               valueFrom: {secretKeyRef: {name: localshops-vapid, key: private-key}}
           resources:
-            requests: {cpu: 20m, memory: 80Mi}
+            requests: {cpu: 10m, memory: 80Mi}
             limits: {cpu: 200m, memory: 256Mi}
           securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"]}, readOnlyRootFilesystem: true}
 ---

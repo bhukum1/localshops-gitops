@@ -76,8 +76,8 @@ spec:
           ports:
             - {name: redis, containerPort: 6379}
           resources:
-            requests: {cpu: 25m, memory: 48Mi}
-            limits: {cpu: 250m, memory: 192Mi}
+            requests: {cpu: 10m, memory: 48Mi}
+            limits: {memory: 192Mi}
           readinessProbe:
             exec: {command: ["sh", "-ec", "redis-cli ping | grep -q PONG"]}
             periodSeconds: 5

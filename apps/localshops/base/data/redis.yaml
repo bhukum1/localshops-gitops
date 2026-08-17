@@ -56,10 +56,9 @@ spec:
               containerPort: 6379
           resources:
             requests:
-              cpu: 20m
+              cpu: 10m
               memory: 40Mi
             limits:
-              cpu: 200m
               memory: 144Mi
           readinessProbe:
             exec:

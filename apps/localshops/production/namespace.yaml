@@ -47,6 +47,13 @@ metadata:
 automountServiceAccountToken: false
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres
+  namespace: localshops
+automountServiceAccountToken: false
+---
+apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-resources
@@ -54,8 +61,8 @@ metadata:
 spec:
   limits:
     - type: Container
-      defaultRequest: {cpu: 25m, memory: 64Mi}
-      default: {cpu: 500m, memory: 512Mi}
+      defaultRequest: {cpu: 10m, memory: 64Mi}
+      default: {memory: 512Mi}
 ---
 apiVersion: v1
 kind: ResourceQuota
@@ -66,7 +73,6 @@ spec:
   hard:
     requests.cpu: "1500m"
     requests.memory: 3Gi
-    limits.cpu: "6"
     limits.memory: 6Gi
     pods: "30"
     services: "12"

@@ -45,7 +45,7 @@ patches:
         value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
-        value: 40m
+        value: 20m
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
         value: 112Mi
@@ -56,7 +56,7 @@ patches:
         value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
-        value: 35m
+        value: 15m
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
         value: 112Mi
@@ -109,9 +109,6 @@ patches:
       - op: replace
         path: /spec/hard/requests.memory
         value: 1536Mi
-      - op: replace
-        path: /spec/hard/limits.cpu
-        value: "3"
       - op: replace
         path: /spec/hard/limits.memory
         value: 3Gi
