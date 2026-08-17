@@ -1,15 +1,3 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-backups
-  namespace: localshops
-spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: oci-bv-retain
-  resources:
-    requests:
-      storage: 50Gi
----
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -29,7 +17,7 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: database-maintenance
+            app.kubernetes.io/name: postgres-backup
             app.kubernetes.io/component: backup
             app.kubernetes.io/part-of: bhuplabs-local
         spec:
@@ -41,11 +29,9 @@ spec:
             runAsNonRoot: true
             runAsUser: 999
             runAsGroup: 999
-            fsGroup: 999
-            fsGroupChangePolicy: OnRootMismatch
             seccompProfile: {type: RuntimeDefault}
-          containers:
-            - name: backup
+          initContainers:
+            - name: dump
               image: docker.io/library/postgres:16-bookworm
               imagePullPolicy: IfNotPresent
               command: ["sh", "-ec"]
@@ -53,7 +39,7 @@ spec:
                 - |
                   umask 077
                   timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
-                  backup_file="/backups/localshops-${timestamp}.dump"
+                  backup_file="/work/localshops-${timestamp}.dump"
                   pg_dump \
                     --host=postgres \
                     --username="$PGUSER" \
@@ -63,10 +49,7 @@ spec:
                     --file="$backup_file"
                   pg_restore --list "$backup_file" >/dev/null
                   sha256sum "$backup_file" >"${backup_file}.sha256"
-                  find /backups -type f \
-                    \( -name 'localshops-*.dump' -o -name 'localshops-*.dump.sha256' \) \
-                    -mtime +7 -delete
-                  echo "Validated PostgreSQL backup: ${backup_file}"
+                  echo "Validated PostgreSQL dump: ${backup_file}"
               env:
                 - {name: PGDATABASE, value: localshops}
                 - {name: PGUSER, value: localshops}
@@ -81,13 +64,55 @@ spec:
                 capabilities: {drop: ["ALL"]}
                 readOnlyRootFilesystem: true
               volumeMounts:
-                - {name: backups, mountPath: /backups}
+                - {name: work, mountPath: /work}
+                - {name: tmp, mountPath: /tmp}
+          containers:
+            - name: upload
+              image: docker.io/rclone/rclone@sha256:6bed02519c75f58ddcc52f739da35b657042da1200c59ac1695e19bb911162a8
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-ec"]
+              args:
+                - |
+                  rclone copy /work "oci:${BACKUP_BUCKET}/postgres" \
+                    --include='localshops-*.dump' \
+                    --include='localshops-*.dump.sha256'
+                  rclone delete "oci:${BACKUP_BUCKET}/postgres" \
+                    --min-age=30d \
+                    --include='localshops-*.dump' \
+                    --include='localshops-*.dump.sha256'
+                  echo "Uploaded PostgreSQL backup to Object Storage"
+              env:
+                - {name: BACKUP_BUCKET, value: dukly-db-backups}
+                - {name: RCLONE_CONFIG, value: /tmp/rclone.conf}
+                - {name: RCLONE_CONFIG_OCI_TYPE, value: s3}
+                - {name: RCLONE_CONFIG_OCI_PROVIDER, value: Other}
+                - {name: RCLONE_CONFIG_OCI_ENV_AUTH, value: "true"}
+                - {name: RCLONE_CONFIG_OCI_REGION, value: ap-hyderabad-1}
+                - {name: RCLONE_CONFIG_OCI_ENDPOINT, value: https://axbcwhek7zcg.compat.objectstorage.ap-hyderabad-1.oraclecloud.com}
+                # OCI's S3 compatibility endpoint rejects the AWS SDK's
+                # streaming aws-chunked encoding used by PutObject.
+                - {name: RCLONE_CONFIG_OCI_USE_PRESIGNED_REQUEST, value: "true"}
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef: {name: localshops-db-backups, key: access-key-id}
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef: {name: localshops-db-backups, key: secret-access-key}
+              resources:
+                requests: {cpu: 10m, memory: 64Mi}
+                limits: {memory: 256Mi}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: {drop: ["ALL"]}
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - {name: work, mountPath: /work, readOnly: true}
                 - {name: tmp, mountPath: /tmp}
           volumes:
-            - name: backups
-              persistentVolumeClaim: {claimName: postgres-backups}
+            - name: work
+              emptyDir: {sizeLimit: 1Gi}
             - name: tmp
-              emptyDir: {}
+              emptyDir: {sizeLimit: 128Mi}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -108,7 +133,7 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: database-maintenance
+            app.kubernetes.io/name: postgres-restore-check
             app.kubernetes.io/component: restore-check
             app.kubernetes.io/part-of: bhuplabs-local
         spec:
@@ -120,9 +145,51 @@ spec:
             runAsNonRoot: true
             runAsUser: 999
             runAsGroup: 999
-            fsGroup: 999
-            fsGroupChangePolicy: OnRootMismatch
             seccompProfile: {type: RuntimeDefault}
+          initContainers:
+            - name: download
+              image: docker.io/rclone/rclone@sha256:6bed02519c75f58ddcc52f739da35b657042da1200c59ac1695e19bb911162a8
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-ec"]
+              args:
+                - |
+                  latest_backup="$(rclone lsf "oci:${BACKUP_BUCKET}/postgres" \
+                    --files-only \
+                    --include='localshops-*.dump' | sort | tail -n 1)"
+                  test -n "$latest_backup"
+                  rclone copyto \
+                    "oci:${BACKUP_BUCKET}/postgres/${latest_backup}" \
+                    "/work/${latest_backup}"
+                  rclone copyto \
+                    "oci:${BACKUP_BUCKET}/postgres/${latest_backup}.sha256" \
+                    "/work/${latest_backup}.sha256"
+                  cd /work
+                  sha256sum -c "${latest_backup}.sha256"
+              env:
+                - {name: BACKUP_BUCKET, value: dukly-db-backups}
+                - {name: RCLONE_CONFIG, value: /tmp/rclone.conf}
+                - {name: RCLONE_CONFIG_OCI_TYPE, value: s3}
+                - {name: RCLONE_CONFIG_OCI_PROVIDER, value: Other}
+                - {name: RCLONE_CONFIG_OCI_ENV_AUTH, value: "true"}
+                - {name: RCLONE_CONFIG_OCI_REGION, value: ap-hyderabad-1}
+                - {name: RCLONE_CONFIG_OCI_ENDPOINT, value: https://axbcwhek7zcg.compat.objectstorage.ap-hyderabad-1.oraclecloud.com}
+                - {name: RCLONE_CONFIG_OCI_USE_PRESIGNED_REQUEST, value: "true"}
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef: {name: localshops-db-backups, key: access-key-id}
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef: {name: localshops-db-backups, key: secret-access-key}
+              resources:
+                requests: {cpu: 10m, memory: 64Mi}
+                limits: {memory: 256Mi}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: {drop: ["ALL"]}
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - {name: work, mountPath: /work}
+                - {name: tmp, mountPath: /tmp}
           containers:
             - name: restore-check
               image: docker.io/library/postgres:16-bookworm
@@ -130,9 +197,8 @@ spec:
               command: ["sh", "-ec"]
               args:
                 - |
-                  latest_backup="$(find /backups -maxdepth 1 -type f -name 'localshops-*.dump' -print | sort | tail -n 1)"
+                  latest_backup="$(find /work -maxdepth 1 -type f -name 'localshops-*.dump' -print | sort | tail -n 1)"
                   test -n "$latest_backup"
-                  sha256sum --check "${latest_backup}.sha256"
 
                   mkdir -p /restore/data /restore/socket
                   initdb \
@@ -175,13 +241,13 @@ spec:
                 capabilities: {drop: ["ALL"]}
                 readOnlyRootFilesystem: true
               volumeMounts:
-                - {name: backups, mountPath: /backups, readOnly: true}
+                - {name: work, mountPath: /work, readOnly: true}
                 - {name: restore, mountPath: /restore}
                 - {name: tmp, mountPath: /tmp}
           volumes:
-            - name: backups
-              persistentVolumeClaim: {claimName: postgres-backups}
+            - name: work
+              emptyDir: {sizeLimit: 1Gi}
             - name: restore
-              emptyDir: {}
+              emptyDir: {sizeLimit: 1Gi}
             - name: tmp
-              emptyDir: {}
+              emptyDir: {sizeLimit: 128Mi}
