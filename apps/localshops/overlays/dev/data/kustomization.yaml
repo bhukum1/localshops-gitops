@@ -10,7 +10,7 @@ patches:
     patch: |-
       - op: add
         path: /spec/volumeName
-        value: localshops-dev-postgres-pv-node01
+        value: localshops-dev-postgres-pv-oke-0
   - target:
       kind: StatefulSet
       name: postgres
@@ -18,12 +18,4 @@ patches:
       - op: add
         path: /spec/template/spec/nodeSelector
         value:
-          kubernetes.io/hostname: node01
-  - target:
-      kind: Deployment
-      name: session-redis
-    patch: |-
-      - op: add
-        path: /spec/template/spec/nodeSelector
-        value:
-          kubernetes.io/hostname: node01
+          kubernetes.io/hostname: 10.0.30.26

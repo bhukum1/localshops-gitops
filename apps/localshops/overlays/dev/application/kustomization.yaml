@@ -17,10 +17,6 @@ patches:
       kind: Deployment
       name: api
     patch: |-
-      - op: add
-        path: /spec/template/spec/nodeSelector
-        value:
-          kubernetes.io/hostname: node01
       - op: replace
         path: /spec/strategy
         value:
@@ -29,10 +25,6 @@ patches:
       kind: Deployment
       name: web
     patch: |-
-      - op: add
-        path: /spec/template/spec/nodeSelector
-        value:
-          kubernetes.io/hostname: node01
       - op: replace
         path: /spec/strategy
         value:
@@ -41,10 +33,6 @@ patches:
       kind: Deployment
       name: notification-worker
     patch: |-
-      - op: add
-        path: /spec/template/spec/nodeSelector
-        value:
-          kubernetes.io/hostname: node01
       - op: replace
         path: /spec/strategy
         value:

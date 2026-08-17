@@ -7,12 +7,3 @@ images:
   - name: localshops-api
     newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-api
     digest: sha256:fa997684b42314e64e413a4db1cf882802295535217b8e6c77d718482f7ef7dc
-patches:
-  - target:
-      kind: Job
-      name: localshops-migrate
-    patch: |-
-      - op: add
-        path: /spec/template/spec/nodeSelector
-        value:
-          kubernetes.io/hostname: node01

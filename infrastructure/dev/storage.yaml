@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: localshops-dev-postgres-pv-node01
+  name: localshops-dev-postgres-pv-oke-0
   labels:
     app.kubernetes.io/part-of: bhuplabs-local
     environment: development
@@ -20,4 +20,4 @@ spec:
         - matchExpressions:
             - key: kubernetes.io/hostname
               operator: In
-              values: [node01]
+              values: [10.0.30.26]
