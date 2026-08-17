@@ -7,10 +7,8 @@ spec:
   interval: 1m
   ref:
     branch: main
-  secretRef:
-    name: flux-system
   timeout: 60s
-  # GitHub's official SSH-over-443 endpoint works with restricted HTTPS egress.
+  # Public, read-only HTTPS avoids storing a deploy key in the cluster.
   url: https://github.com/bhukum1/localshops-gitops.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
