@@ -5,6 +5,10 @@ metadata:
 data:
   ENVIRONMENT: development
   APP_ORIGIN: https://dev-app.bhuplabs.dev
+  ADMIN_ORIGIN: https://dev-app.bhuplabs.dev
+  APP_HOSTS: dev-app.bhuplabs.dev
+  ADMIN_HOSTS: dev-app.bhuplabs.dev
+  STOREFRONT_HOSTS: dev-shops.bhuplabs.dev
   VAPID_SUBJECT: mailto:admin@bhuplabs.dev
   STOREFRONT_ORIGIN: https://dev-shops.bhuplabs.dev
   API_INTERNAL_URL: http://api.localshops-dev.svc.cluster.local:8000
