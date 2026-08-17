@@ -49,7 +49,7 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: localshops-oidc
+                  name: localshops-runtime
                   key: redis-password
           ports:
             - name: redis

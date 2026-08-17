@@ -8,7 +8,7 @@ or deploy key is stored in the cluster.
 
 - Create `/var/lib/localshops-dev/postgres` on OKE node `10.0.30.26`, owned by UID/GID
   `999` with mode `0750`. The DEV local PV is deliberately pinned to this node.
-- Create `localshops-database`, `localshops-oidc`, `localshops-provisioner` and `ocir-pull`
+- Create `localshops-database`, `localshops-runtime`, `localshops-vapid` and `ocir-pull`
   Secrets in `localshops-dev`. Never commit their values.
 - Apply the pinned minimal Flux v2.9.4 components and
   `clusters/pilot/dev/flux-system/gotk-sync.yaml`.
