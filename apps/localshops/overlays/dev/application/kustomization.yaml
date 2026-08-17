@@ -21,6 +21,7 @@ patches:
         path: /spec/strategy
         value:
           type: Recreate
+          rollingUpdate: null
   - target:
       kind: Deployment
       name: web
@@ -29,6 +30,7 @@ patches:
         path: /spec/strategy
         value:
           type: Recreate
+          rollingUpdate: null
   - target:
       kind: Deployment
       name: notification-worker
@@ -37,3 +39,4 @@ patches:
         path: /spec/strategy
         value:
           type: Recreate
+          rollingUpdate: null
