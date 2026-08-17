@@ -4,4 +4,3 @@ resources:
   - namespace.yaml
   - storage.yaml
   - flux-rbac.yaml
-  - keycloak-network-policy.yaml
