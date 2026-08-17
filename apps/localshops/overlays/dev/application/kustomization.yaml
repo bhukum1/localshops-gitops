@@ -4,6 +4,7 @@ namespace: localshops-dev
 resources:
   - ../../../base/application
   - config.yaml
+  - pod-disruption-budgets.yaml
   - release.yaml
 images:
   - name: localshops-api

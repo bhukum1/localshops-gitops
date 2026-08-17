@@ -55,7 +55,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: docker.io/library/postgres:16-bookworm
+          image: docker.io/library/postgres@sha256:60f4761b9035e0b8d5218f701a8c3382f641bf12b1604822574cf5be3baeb537
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_DB

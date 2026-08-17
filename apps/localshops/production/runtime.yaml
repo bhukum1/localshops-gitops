@@ -61,7 +61,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: redis
-          image: docker.io/library/redis:8.2-alpine
+          image: docker.io/library/redis@sha256:8f49e89909371706d44ce3c463dbfde2ab1a34a0aff859bf02f16fa025cfec97
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
