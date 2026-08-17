@@ -7,11 +7,11 @@ resources:
   - release.yaml
 images:
   - name: localshops-api
-    newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-api
-    digest: sha256:fa997684b42314e64e413a4db1cf882802295535217b8e6c77d718482f7ef7dc
+    newName: hyd.ocir.io/axbcwhek7zcg/localshops-api
+    digest: sha256:3a996a8db0618b2280389573814e710584825875e066b4483fc33a6f5fbb26e1
   - name: localshops-web
-    newName: ocir.us-ashburn-1.oci.oraclecloud.com/idcnbp9cfade/localshops-web
-    digest: sha256:f2961443fccc58533664ac60f0b9480e92e9ed21873532e7dac88574432fe420
+    newName: hyd.ocir.io/axbcwhek7zcg/localshops-web
+    digest: sha256:d416c23edebfbabbff138958d70322a1efc6e64eb27cf0e655de1f092b8628f5
 patches:
   - target:
       kind: Deployment
