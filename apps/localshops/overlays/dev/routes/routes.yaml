@@ -1,9 +1,9 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: localshops-dev-tls
+  name: localshops-tls
 spec:
-  secretName: localshops-dev-tls
+  secretName: localshops-tls
   dnsNames:
     - dev-shops.bhuplabs.dev
     - dev-app.bhuplabs.dev
@@ -12,157 +12,45 @@ spec:
     kind: ClusterIssuer
     name: letsencrypt-prod
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: localshops-dev
+  name: localshops
+  annotations:
+    kubernetes.io/ingress.class: traefik
 spec:
-  gatewayClassName: traefik
-  listeners:
-    - name: shops-web
-      hostname: dev-shops.bhuplabs.dev
-      port: 8000
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: shops-websecure
-      hostname: dev-shops.bhuplabs.dev
-      port: 8443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: localshops-dev-tls
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: app-web
-      hostname: dev-app.bhuplabs.dev
-      port: 8000
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: app-websecure
-      hostname: dev-app.bhuplabs.dev
-      port: 8443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: localshops-dev-tls
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: api-web
-      hostname: dev-api.bhuplabs.dev
-      port: 8000
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: api-websecure
-      hostname: dev-api.bhuplabs.dev
-      port: 8443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: localshops-dev-tls
-      allowedRoutes:
-        namespaces:
-          from: Same
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: shops-http-redirect
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: shops-web
-  hostnames: [dev-shops.bhuplabs.dev]
+  ingressClassName: traefik
+  tls:
+    - secretName: localshops-tls
+      hosts:
+        - dev-shops.bhuplabs.dev
+        - dev-app.bhuplabs.dev
+        - dev-api.bhuplabs.dev
   rules:
-    - filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: app-http-redirect
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: app-web
-  hostnames: [dev-app.bhuplabs.dev]
-  rules:
-    - filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: api-http-redirect
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: api-web
-  hostnames: [dev-api.bhuplabs.dev]
-  rules:
-    - filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: shops
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: shops-websecure
-  hostnames: [dev-shops.bhuplabs.dev]
-  rules:
-    - backendRefs:
-        - name: web
-          port: 3000
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: app
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: app-websecure
-  hostnames: [dev-app.bhuplabs.dev]
-  rules:
-    - backendRefs:
-        - name: web
-          port: 3000
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: api
-spec:
-  parentRefs:
-    - name: localshops-dev
-      sectionName: api-websecure
-  hostnames: [dev-api.bhuplabs.dev]
-  rules:
-    - backendRefs:
-        - name: api
-          port: 8000
+    - host: dev-shops.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {number: 3000}
+    - host: dev-app.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {number: 3000}
+    - host: dev-api.bhuplabs.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port: {number: 8000}

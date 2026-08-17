@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backups
+  namespace: localshops
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: oci-bv-retain
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: localshops
+spec:
+  schedule: "30 2 * * *"
+  timeZone: Asia/Kolkata
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: database-maintenance
+            app.kubernetes.io/component: backup
+            app.kubernetes.io/part-of: bhuplabs-local
+        spec:
+          serviceAccountName: database-maintenance
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile: {type: RuntimeDefault}
+          containers:
+            - name: backup
+              image: docker.io/library/postgres:16-bookworm
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-ec"]
+              args:
+                - |
+                  umask 077
+                  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  backup_file="/backups/localshops-${timestamp}.dump"
+                  pg_dump \
+                    --host=postgres \
+                    --username="$PGUSER" \
+                    --dbname="$PGDATABASE" \
+                    --format=custom \
+                    --compress=6 \
+                    --file="$backup_file"
+                  pg_restore --list "$backup_file" >/dev/null
+                  sha256sum "$backup_file" >"${backup_file}.sha256"
+                  find /backups -type f \
+                    \( -name 'localshops-*.dump' -o -name 'localshops-*.dump.sha256' \) \
+                    -mtime +7 -delete
+                  echo "Validated PostgreSQL backup: ${backup_file}"
+              env:
+                - {name: PGDATABASE, value: localshops}
+                - {name: PGUSER, value: localshops}
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: {name: localshops-database, key: password}
+              resources:
+                requests: {cpu: 10m, memory: 64Mi}
+                limits: {memory: 256Mi}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: {drop: ["ALL"]}
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - {name: backups, mountPath: /backups}
+                - {name: tmp, mountPath: /tmp}
+          volumes:
+            - name: backups
+              persistentVolumeClaim: {claimName: postgres-backups}
+            - name: tmp
+              emptyDir: {}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-restore-check
+  namespace: localshops
+spec:
+  schedule: "0 3 * * 0"
+  timeZone: Asia/Kolkata
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: database-maintenance
+            app.kubernetes.io/component: restore-check
+            app.kubernetes.io/part-of: bhuplabs-local
+        spec:
+          serviceAccountName: database-maintenance
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile: {type: RuntimeDefault}
+          containers:
+            - name: restore-check
+              image: docker.io/library/postgres:16-bookworm
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-ec"]
+              args:
+                - |
+                  latest_backup="$(find /backups -maxdepth 1 -type f -name 'localshops-*.dump' -print | sort | tail -n 1)"
+                  test -n "$latest_backup"
+                  sha256sum --check "${latest_backup}.sha256"
+
+                  mkdir -p /restore/data /restore/socket
+                  initdb \
+                    --pgdata=/restore/data \
+                    --auth=trust \
+                    --no-locale \
+                    --encoding=UTF8 >/dev/null
+                  pg_ctl \
+                    --pgdata=/restore/data \
+                    --options="-k /restore/socket -p 55432 -c listen_addresses=''" \
+                    --wait start >/dev/null
+                  cleanup() {
+                    pg_ctl --pgdata=/restore/data --mode=fast --wait stop >/dev/null
+                  }
+                  trap cleanup EXIT
+
+                  createdb --host=/restore/socket --port=55432 restore_check
+                  pg_restore \
+                    --host=/restore/socket \
+                    --port=55432 \
+                    --dbname=restore_check \
+                    --exit-on-error \
+                    --no-owner \
+                    --no-privileges \
+                    "$latest_backup"
+                  table_count="$(psql \
+                    --host=/restore/socket \
+                    --port=55432 \
+                    --dbname=restore_check \
+                    --tuples-only \
+                    --no-align \
+                    --command="SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';")"
+                  test "$table_count" -gt 0
+                  echo "Restore verification succeeded: ${table_count} public tables from ${latest_backup}"
+              resources:
+                requests: {cpu: 10m, memory: 96Mi}
+                limits: {memory: 512Mi}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: {drop: ["ALL"]}
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - {name: backups, mountPath: /backups, readOnly: true}
+                - {name: restore, mountPath: /restore}
+                - {name: tmp, mountPath: /tmp}
+          volumes:
+            - name: backups
+              persistentVolumeClaim: {claimName: postgres-backups}
+            - name: restore
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}

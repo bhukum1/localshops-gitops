@@ -75,7 +75,7 @@ kind: NetworkPolicy
 metadata: {name: database-egress, namespace: localshops}
 spec:
   podSelector:
-    matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, migration, notification-worker]}]
+    matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, database-maintenance, migration, notification-worker]}]
   policyTypes: [Egress]
   egress:
     - to: [{podSelector: {matchLabels: {app.kubernetes.io/name: postgres}}}]
@@ -90,7 +90,7 @@ spec:
   ingress:
     - from:
         - podSelector:
-            matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, migration, notification-worker]}]
+            matchExpressions: [{key: app.kubernetes.io/name, operator: In, values: [api, database-maintenance, migration, notification-worker]}]
       ports: [{protocol: TCP, port: 5432}]
 ---
 apiVersion: networking.k8s.io/v1

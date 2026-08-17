@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - runtime.yaml
   - postgres.yaml
+  - postgres-backup.yaml
   - application.yaml
   - migration.yaml
   - ingress.yaml
