@@ -19,3 +19,6 @@ patches:
         path: /spec/template/spec/nodeSelector
         value:
           kubernetes.io/hostname: 10.0.30.26
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 10m
