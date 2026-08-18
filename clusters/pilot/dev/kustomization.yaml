@@ -7,3 +7,4 @@ resources:
   - migration.yaml
   - application.yaml
   - routes.yaml
+  - production.yaml
