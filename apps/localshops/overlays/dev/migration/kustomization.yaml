@@ -6,4 +6,4 @@ resources:
 images:
   - name: localshops-api
     newName: hyd.ocir.io/axbcwhek7zcg/localshops-api
-    digest: sha256:d587816b631c1b8661437e9eb865a164a1179962d2aaf32e601a39cdb9fd09ab
+    digest: sha256:f13f325b6cf96708e132cda1acf040f49fc3830a09a9c3cdd67559a020ab9c03
